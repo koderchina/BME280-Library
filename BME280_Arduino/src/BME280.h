@@ -80,14 +80,14 @@ enum sensorType
 
 enum standBySettings
 {
-  standByHalf,
-  standBy63ms,
-  standBy125ms,
-  standBy250ms,
-  standBy500ms,
-  standBy1000ms,
-  standBy10ms,
-  standBy20ms  
+    standByHalf,
+    standBy63ms,
+    standBy125ms,
+    standBy250ms,
+    standBy500ms,
+    standBy1000ms,
+    standBy10ms,
+    standBy20ms
 };
 
 enum filterSettings
@@ -96,7 +96,29 @@ enum filterSettings
     IIR2,
     IIR4,
     IIR8,
-    IIR16  
+    IIR16
+};
+
+struct compensationParameters
+{
+    unsigned short dig_T1;
+    short dig_T2;
+    short dig_T3;
+    unsigned short dig_P1;
+    short dig_P2;
+    short dig_P3;
+    short dig_P4;
+    short dig_P5;
+    short dig_P6;
+    short dig_P7;
+    short dig_P8;
+    short dig_P9;
+    unsigned char dig_H1;
+    short dig_H2;
+    unsigned char dig_H3;
+    short dig_H4;
+    short dig_H5;
+    char dig_H6;
 };
 
 class BME280
@@ -107,7 +129,7 @@ public:
     uint8_t setMode(operatingMode deviceMode);
     bool setOversampling(sensorType sensor, overSamplingType oversampling);
     bool getOversampling();
-    uint8_t iirFilter(filterSettings iirSetting);lear
+    uint8_t iirFilter(filterSettings iirSetting);
     uint8_t inactiveTime(standBySettings standByTime);
     uint8_t measurementTime(); // Do this later
     void getSensorData();
@@ -115,9 +137,16 @@ public:
 
 private:
     void readByte(byte addr, byte *data);
+    uint8_t readByte(byte addr);
     void writeByte(byte addr, byte *data);
     void readSensors();
     void getCalibration();
+    uint16_t combineUShort(uint8_t lsb, uint8_t msb);
+    int16_t combineShort(uint8_t lsb, uint8_t msb);
+    uint8_t combineUByte(uint8_t lsb);
+    int8_t combineByte(uint8_t lsb);
+    void readCalibrationRegisters();
+    struct compensationParameters params;
 
 protected:
 };
