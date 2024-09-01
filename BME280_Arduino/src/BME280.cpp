@@ -96,7 +96,7 @@ bool BME280::setOversampling(sensorType sensor, overSamplingType oversampling)
     {
         byte ctrlHumRegister;
         readByte(REG_CTRL_HUM, &ctrlHumRegister);
-        ctrlHumRegister = (ctrlHumRegister & 0xF8) | osValues[oversampling];
+        ctrlHumRegister = (ctrlHumRegister & 0xF8) | (osValues[oversampling] & 0x07);
         writeByte(REG_CTRL_HUM, &ctrlHumRegister);
         return true;
     }
@@ -104,13 +104,49 @@ bool BME280::setOversampling(sensorType sensor, overSamplingType oversampling)
     {
         byte ctrlMeasRegister;
         readByte(REG_CTRL_MEAS, &ctrlMeasRegister);
-        ctrlMeasRegister = (ctrlMeasRegister & 0xE3) | (osValues[oversampling] << 2);
+        ctrlMeasRegister = (ctrlMeasRegister & 0xE3) | ((osValues[oversampling] & 0x07) << 2);
         writeByte(REG_CTRL_MEAS, &ctrlMeasRegister);
         return true;
     }
     return false;
 }
 
-uint8_t BME280::iirFilter()
+uint8_t BME280::iirFilter(filterSettings filterSetting)
+{  
+    byte filterSettingValues[6] = {0x00, 0x01, 0x02, 0x03, 0x04};
+    uint8_t configRegister;
+    readByte(REG_CONFIG, &configRegister);
+    configRegister = (configRegister & 0xE3) | ((filterSettingValues[filterSetting] & 0x7) << 2);
+    writeByte(REG_CONFIG, &configRegister);
+    return filterSettingValues[filterSetting];
+}
+
+uint8_t BME280::inactiveTime(standBySettings standByTime)
 {
+    byte sbTimeValues[6] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
+    uint8_t configRegister;
+    readByte(REG_CONFIG, &configRegister);
+    configRegister = (configRegister && 0x1F) | ((sbTimeValues[standByTime] & 0x07) << 5);
+    writeByte(REG_CONFIG, &configRegister);
+    return sbTimeValues[standByTime];
+}
+
+void getSensorData()
+{
+    byte statusRegister;
+    do
+    {
+        readByte(REG_STATUS, &statusRegister);
+    }
+    while(!(statusRegister & 0x01));
+    byte sensorData[8];
+    Wire.beginTransmission(SENSOR_ADDR);
+    Wire.write(REG_PRESS_MSB);
+    Wire.endTransmission();
+    Wire.requestFrom(SENSOR_ADDR, 8);
+    uint8_t structSize = Wire.available();
+    for(uint8_t i = 0; i < structSize; ++i)
+    {
+        sensorData[i] = Wire.read();
+    }
 }

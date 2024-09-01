@@ -66,7 +66,6 @@ enum overSamplingType
     SKIP_MEASUREMENT,
     OVERSAMPLING1,
     OVERSAMPLING2,
-    OVERSAMPLING3,
     OVERSAMPLING4,
     OVERSAMPLING8,
     OVERSAMPLING16
@@ -79,6 +78,27 @@ enum sensorType
     TEMP
 };
 
+enum standBySettings
+{
+  standByHalf,
+  standBy63ms,
+  standBy125ms,
+  standBy250ms,
+  standBy500ms,
+  standBy1000ms,
+  standBy10ms,
+  standBy20ms  
+};
+
+enum filterSettings
+{
+    filterOff,
+    IIR2,
+    IIR4,
+    IIR8,
+    IIR16  
+};
+
 class BME280
 {
 public:
@@ -87,9 +107,9 @@ public:
     uint8_t setMode(operatingMode deviceMode);
     bool setOversampling(sensorType sensor, overSamplingType oversampling);
     bool getOversampling();
-    uint8_t iirFilter();
-    uint8_t inactiveTime();
-    uint8_t measurementTime();
+    uint8_t iirFilter(filterSettings iirSetting);lear
+    uint8_t inactiveTime(standBySettings standByTime);
+    uint8_t measurementTime(); // Do this later
     void getSensorData();
     void reset();
 
