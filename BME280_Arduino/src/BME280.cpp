@@ -55,59 +55,81 @@ void BME280::writeByte(byte addr, byte *data)
     // End transmission and send the data
     Wire.endTransmission();
 }
-
-uint16_t BME280::combineUShort(uint8_t lsb, uint8_t msb)
-{
-    return readByte(lsb) | (readByte(msb) << 8);
-}
-
-int16_t BME280::combineShort(uint8_t lsb, uint8_t msb)
-{
-    return (int16_t)(readByte(lsb) | (readByte(msb) << 8));
-}
-
-uint8_t BME280::combineUByte(uint8_t lsb)
-{
-    return readByte(lsb);
-}
-
 int8_t BME280::combineByte(uint8_t lsb)
 {
     return (int8_t)(readByte(lsb));
 }
 
+void BME280::printParams()
+{
+    Serial.begin(115200);
+    Serial.print("_cal_dig_T1: ");
+    Serial.println(_cal_dig_T1);
+    Serial.print("_cal_dig_T2: ");
+    Serial.println(_cal_dig_T2);
+    Serial.print("_cal_dig_T3: ");
+    Serial.println(_cal_dig_T3);
+    Serial.print("_cal_dig_P1: ");
+    Serial.println(_cal_dig_P1);
+    Serial.print("_cal_dig_P2: ");
+    Serial.println(_cal_dig_P2);
+    Serial.print("_cal_dig_P3: ");
+    Serial.println(_cal_dig_P3);
+    Serial.print("_cal_dig_P4: ");
+    Serial.println(_cal_dig_P4);
+    Serial.print("_cal_dig_P5: ");
+    Serial.println(_cal_dig_P5);
+    Serial.print("_cal_dig_P6: ");
+    Serial.println(_cal_dig_P6);
+    Serial.print("_cal_dig_P8: ");
+    Serial.println(_cal_dig_P7);
+    Serial.print("_cal_dig_P9: ");
+    Serial.println(_cal_dig_P9);
+    Serial.print("_cal_dig_H1: ");
+    Serial.println(_cal_dig_H1);
+    Serial.print("_cal_dig_H2: ");
+    Serial.println(_cal_dig_H2);
+    Serial.print("_cal_dig_H3: ");
+    Serial.println(_cal_dig_H3);
+    Serial.print("_cal_dig_H4: ");
+    Serial.println(_cal_dig_H4);
+    Serial.print("_cal_dig_H5: ");
+    Serial.println(_cal_dig_H5);
+    Serial.print("_cal_dig_H6: ");
+    Serial.println(_cal_dig_H6);
+}
+
 void BME280::readCalibrationRegisters()
 {
-    params.dig_T1 = combineUShort(REG_DIG_T1_LSB, REG_DIG_T1_MSB);
-    params.dig_T2 = combineShort(REG_DIG_T2_LSB, REG_DIG_T2_MSB);
-    params.dig_T3 = combineShort(REG_DIG_T3_LSB, REG_DIG_T3_MSB);
-    params.dig_P1 = combineUShort(REG_DIG_P1_LSB, REG_DIG_P1_MSB);
-    params.dig_P2 = combineShort(REG_DIG_P2_LSB, REG_DIG_P2_MSB);
-    params.dig_P3 = combineShort(REG_DIG_P3_LSB, REG_DIG_P3_MSB);
-    params.dig_P4 = combineShort(REG_DIG_P4_LSB, REG_DIG_P4_MSB);
-    params.dig_P5 = combineShort(REG_DIG_P5_LSB, REG_DIG_P5_MSB);
-    params.dig_P6 = combineShort(REG_DIG_P6_LSB, REG_DIG_P6_MSB);
-    params.dig_P7 = combineShort(REG_DIG_P7_LSB, REG_DIG_P7_MSB);
-    params.dig_P8 = combineShort(REG_DIG_P8_LSB, REG_DIG_P8_MSB);
-    params.dig_P9 = combineShort(REG_DIG_P9_LSB, REG_DIG_P9_MSB);
-    params.dig_H1 = combineUByte(REG_DIG_H1);
-    params.dig_H2 = combineShort(REG_DIG_H2_LSB, REG_DIG_H2_MSB);
-    params.dig_H3 = combineUByte(REG_DIG_H3);
-    params.dig_H4 = (int16_t)(((int16_t)readByte(0xE4) << 4) | (readByte(0xE5) & 0x0F));
+    getData(BME280_T1_REG, _cal_dig_T1);
+    getData(BME280_T2_REG, _cal_dig_T2);
+    getData(BME280_T3_REG, _cal_dig_T3);
+    getData(BME280_P1_REG, _cal_dig_P1);
+    getData(BME280_P2_REG, _cal_dig_P2);
+    getData(BME280_P3_REG, _cal_dig_P3);
+    getData(BME280_P4_REG, _cal_dig_P4);
+    getData(BME280_P5_REG, _cal_dig_P5);
+    getData(BME280_P6_REG, _cal_dig_P6);
+    getData(BME280_P7_REG, _cal_dig_P7);
+    getData(BME280_P8_REG, _cal_dig_P8);
+    getData(BME280_P9_REG, _cal_dig_P9);
+    getData(BME280_H1_REG, _cal_dig_H1);
+    getData(BME280_H2_REG, _cal_dig_H2);
+    getData(BME280_H3_REG, _cal_dig_P3);
+    uint8_t tempVar; // Single-Byte temporary variable
+    getData(BME280_H4_REG, tempVar);
+    _cal_dig_H4 = tempVar << 4;
+    getData(BME280_H4_REG + 1, tempVar);
+    _cal_dig_H4 |= tempVar & 0xF;
+    getData(BME280_H5_REG + 2, tempVar);
+    _cal_dig_H5 = tempVar << 4;
+    getData(BME280_H5_REG, tempVar);
+    _cal_dig_H5 |= tempVar >> 4;
+    getData(BME280_H6_REG, _cal_dig_H6);
+    _cal_dig_H5 = (readByte(BME280_H5_REG + 1) << 4) | (readByte(BME280_H5_REG) >> 4);
+    //_cal_dig_H6 = readByte(BME280_H6_REG);
 
-    // Sign extend to make sure the 12th bit is interpreted correctly as a sign bit
-    if (params.dig_H4 & 0x0800)
-    {
-        params.dig_H4 |= 0xF000; // Set the upper 4 bits to 1 to properly extend the sign
-    }
-    params.dig_H5 = (int16_t)(((int16_t)(readByte(0xE5) >> 4) & 0x0F) | (readByte(0xE6) << 4));
-
-    // Sign extend to make sure the 12th bit is interpreted correctly as a sign bit
-    if (params.dig_H5 & 0x0800)
-    {
-        params.dig_H5 |= 0xF000; // Set the upper 4 bits to 1 to properly extend the sign
-    }
-    params.dig_H6 = combineByte(0xE7);
+    printParams();
 }
 
 /**
@@ -131,6 +153,8 @@ bool BME280::begin(int32_t i2cSpeed)
     {
         // Sensor is working propertly and I2C is working
         readCalibrationRegisters();
+        // Reset the sensor so it goes back to sleep mode and all changes are reset.
+        reset();
         return true;
     }
     // Something is not right with sensor or I2C comunication, returning false
@@ -157,6 +181,8 @@ uint8_t BME280::setMode(operatingMode deviceMode)
         mode = 0x03;
     };
     ctrlMeasRegister = (ctrlMeasRegister & 0xFC) | mode;
+    Serial.print("Mode is set.\nCTRL_MEAS_REGISTER: ");
+    Serial.println(ctrlMeasRegister, BIN);
     writeByte(REG_CTRL_MEAS, &ctrlMeasRegister);
     return ctrlMeasRegister;
 }
@@ -170,6 +196,8 @@ bool BME280::setOversampling(sensorType sensor, overSamplingType oversampling)
         byte ctrlHumRegister;
         readByte(REG_CTRL_HUM, &ctrlHumRegister);
         ctrlHumRegister = (ctrlHumRegister & 0xF8) | (osValues[oversampling] & 0x07);
+        Serial.print("Humidty oversampling set. REG_CTRL_HUM: ");
+        Serial.println(ctrlHumRegister, BIN);
         writeByte(REG_CTRL_HUM, &ctrlHumRegister);
         return true;
     }
@@ -178,6 +206,16 @@ bool BME280::setOversampling(sensorType sensor, overSamplingType oversampling)
         byte ctrlMeasRegister;
         readByte(REG_CTRL_MEAS, &ctrlMeasRegister);
         ctrlMeasRegister = (ctrlMeasRegister & 0xE3) | ((osValues[oversampling] & 0x07) << 2);
+        Serial.print("Measurement oversampling set. REG_CTRL_MEAS: ");
+        Serial.println(ctrlMeasRegister, BIN);
+        writeByte(REG_CTRL_MEAS, &ctrlMeasRegister);
+        return true;
+    }
+    else if (sensor == TEMP)
+    {
+        byte ctrlMeasRegister;
+        readByte(REG_CTRL_MEAS, &ctrlMeasRegister);
+        ctrlMeasRegister = (ctrlMeasRegister & 0x1F) | ((osValues[oversampling] & 0x07) << 5);
         writeByte(REG_CTRL_MEAS, &ctrlMeasRegister);
         return true;
     }
@@ -190,6 +228,8 @@ uint8_t BME280::iirFilter(filterSettings filterSetting)
     uint8_t configRegister;
     readByte(REG_CONFIG, &configRegister);
     configRegister = (configRegister & 0xE3) | ((filterSettingValues[filterSetting] & 0x7) << 2);
+    Serial.print("IIR filter set.\nREG_CONFIG: ");
+    Serial.println(configRegister, BIN);
     writeByte(REG_CONFIG, &configRegister);
     return filterSettingValues[filterSetting];
 }
@@ -200,6 +240,8 @@ uint8_t BME280::inactiveTime(standBySettings standByTime)
     uint8_t configRegister;
     readByte(REG_CONFIG, &configRegister);
     configRegister = (configRegister && 0x1F) | ((sbTimeValues[standByTime] & 0x07) << 5);
+    Serial.print("Inactive time set.\nREG_CONFIG: ");
+    Serial.println(configRegister, BIN);
     writeByte(REG_CONFIG, &configRegister);
     return sbTimeValues[standByTime];
 }
@@ -214,45 +256,43 @@ void BME280::getSensorData()
     Wire.endTransmission();
     Wire.requestFrom(SENSOR_ADDR, 8);
     uint8_t structSize = Wire.available();
-    Serial.begin(115200);
     for (uint8_t i = 0; i < structSize; ++i)
     {
         sensorData[i] = Wire.read();
         // Serial.print(sensorData[i], BIN);
     }
     // Serial.println();
-    int32_t _tfine, _Temperature, _Pressure, _Humidity;
     int64_t i, j, p;
     _Temperature = (int32_t)sensorData[3] << 12 | (int32_t)sensorData[4] << 4 |
                    (int32_t)sensorData[5] >> 4;
-    i = ((((_Temperature >> 3) - ((int32_t)params.dig_T1 << 1))) * ((int32_t)params.dig_T2)) >> 11;
-    j = (((((_Temperature >> 4) - ((int32_t)params.dig_T1)) *
-           ((_Temperature >> 4) - ((int32_t)params.dig_T1))) >>
+    i = ((((_Temperature >> 3) - ((int32_t)_cal_dig_T1 << 1))) * ((int32_t)_cal_dig_T2)) >> 11;
+    j = (((((_Temperature >> 4) - ((int32_t)_cal_dig_T1)) *
+           ((_Temperature >> 4) - ((int32_t)_cal_dig_T1))) >>
           12) *
-         ((int32_t)params.dig_T3)) >>
+         ((int32_t)_cal_dig_T3)) >>
         14;
     _tfine = i + j;
     _Temperature = (_tfine * 5 + 128) >> 8; // In centi-degrees Celsius
-                                            //*******************************//
-                                            // Now compute the pressure      //
-                                            //*******************************//
+    //*******************************//
+    // Now compute the pressure      //
+    //*******************************//
     _Pressure = (int32_t)sensorData[0] << 12 | (int32_t)sensorData[1] << 4 |
                 (int32_t)sensorData[2] >> 4;
     i = ((int64_t)_tfine) - 128000;
-    j = i * i * (int64_t)params.dig_P6;
-    j = j + ((i * (int64_t)params.dig_P5) << 17);
-    j = j + (((int64_t)params.dig_P4) << 35);
-    i = ((i * i * (int64_t)params.dig_P3) >> 8) + ((i * (int64_t)params.dig_P2) << 12);
-    i = (((((int64_t)1) << 47) + i)) * ((int64_t)params.dig_P1) >> 33;
+    j = i * i * (int64_t)_cal_dig_P6;
+    j = j + ((i * (int64_t)_cal_dig_P5) << 17);
+    j = j + (((int64_t)_cal_dig_P4) << 35);
+    i = ((i * i * (int64_t)_cal_dig_P3) >> 8) + ((i * (int64_t)_cal_dig_P2) << 12);
+    i = (((((int64_t)1) << 47) + i)) * ((int64_t)_cal_dig_P1) >> 33;
     if (i == 0)
         _Pressure = 0; // avoid division by 0 exception
     else
     {
         p = 1048576 - _Pressure;
         p = (((p << 31) - j) * 3125) / i;
-        i = (((int64_t)params.dig_P9) * (p >> 13) * (p >> 13)) >> 25;
-        j = (((int64_t)params.dig_P8) * p) >> 19;
-        p = ((p + i + j) >> 8) + (((int64_t)params.dig_P7) << 4);
+        i = (((int64_t)_cal_dig_P9) * (p >> 13) * (p >> 13)) >> 25;
+        j = (((int64_t)_cal_dig_P8) * p) >> 19;
+        p = ((p + i + j) >> 8) + (((int64_t)_cal_dig_P7) << 4);
         _Pressure = p >> 8; // in pascals
     } // of if pressure would cause error
       //**********************************//
@@ -260,21 +300,45 @@ void BME280::getSensorData()
       //**********************************//
     _Humidity = (int32_t)sensorData[6] << 8 | (int32_t)sensorData[7];
     i = (_tfine - ((int32_t)76800));
-    i = (((((_Humidity << 14) - (((int32_t)params.dig_H4) << 20) - (((int32_t)params.dig_H5) * i)) +
+    i = (((((_Humidity << 14) - (((int32_t)_cal_dig_H4) << 20) - (((int32_t)_cal_dig_H5) * i)) +
            ((int32_t)16384)) >>
           15) *
-         (((((((i * ((int32_t)params.dig_H6)) >> 10) *
-              (((i * ((int32_t)params.dig_H3)) >> 11) + ((int32_t)32768))) >>
+         (((((((i * ((int32_t)_cal_dig_H6)) >> 10) *
+              (((i * ((int32_t)_cal_dig_H3)) >> 11) + ((int32_t)32768))) >>
              10) +
             ((int32_t)2097152)) *
-               ((int32_t)params.dig_H2) +
+               ((int32_t)_cal_dig_H2) +
            8192) >>
           14));
-    i = (i - (((((i >> 15) * (i >> 15)) >> 7) * ((int32_t)params.dig_H1)) >> 4));
+    i = (i - (((((i >> 15) * (i >> 15)) >> 7) * ((int32_t)_cal_dig_H1)) >> 4));
     i = (i < 0) ? 0 : i;
     i = (i > 419430400) ? 419430400 : i;
     _Humidity = (uint32_t)(i >> 12) * 100 / 1024; // in percent * 100
-    Serial.println("Pressure: " + String(_Pressure / 100.0));
-    Serial.println("Temperature: " + String(_Temperature / 100.0));
-    Serial.println("Humidity: " + String(_Humidity / 100.0));
+}
+
+float BME280::getTemperature()
+{
+    getSensorData();
+    return _Temperature / 100.0;
+}
+
+float BME280::getPressure()
+{
+    getSensorData();
+    return _Pressure / 100.0;
+}
+
+float BME280::getHumidity()
+{
+    getSensorData();
+    return _Humidity / 100.0;
+}
+
+void BME280::reset()
+{
+    byte resetRegister = readByte(REG_RESET);
+    resetRegister |= 0xB6;
+    Serial.print("Reset register set.\nREG_RESET: ");
+    Serial.println(resetRegister, BIN);
+    writeByte(REG_RESET, &resetRegister);
 }
