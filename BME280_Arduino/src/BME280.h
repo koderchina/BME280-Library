@@ -102,18 +102,18 @@ public:
     float getTemperature();
     float getPressure();
     float getHumidity();
+    void getSensorMeasurements(float &temperature, float &pressure, float &humidity);
     void reset();
     void printParams();
 
 private:
     void readByte(byte addr, byte *data);
     uint8_t readByte(byte addr);
+    //This function was taken from soldered library available at https://github.com/SolderedElectronics/Soldered-BME280-BME680-Gas-Sensor-Arduino-Library
     /*********************************************************************************************
-    ** Declare the getData methods as template functions. All device I/O is done    **
-    ** through these two functions regardless of whether I2C, hardware SPI or software SPI is   **
-    ** being used. The two functions are designed so that only the address and a variable are   **
-    ** passed in and the functions determine the size of the parameter variable and reads or    **
-    ** writes that many bytes. So if a read is called using a character array[10] then 10 bytes **
+    ** only the address and a variable are                                                      **
+    ** passed in and the functions determine the size of the parameter variable and reads       **
+    ** that many bytes. So if a read is called using a character array[10] then 10 bytes        **
     ** are read, if called with a int8 then only one byte is read. The return value, if used,   **
     ** is the number of bytes read or written. This is done by using template function          **
     ** definitions which need to be defined in this header file rather than in the c++ program  **

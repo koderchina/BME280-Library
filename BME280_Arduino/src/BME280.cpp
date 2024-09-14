@@ -334,6 +334,13 @@ float BME280::getHumidity()
     return _Humidity / 100.0;
 }
 
+void BME280::getSensorMeasurements(float &temperature, float &pressure, float &humidity)
+{
+    temperature = getTemperature();
+    pressure = getPressure();
+    humidity = getHumidity();
+}
+
 void BME280::reset()
 {
     byte resetRegister = readByte(REG_RESET);

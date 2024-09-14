@@ -2,7 +2,7 @@
 #include "BME280.h"
 // put function declarations here:
 BME280 envSensor;
-
+unsigned long start;
 void setup()
 {
   bool sensorOk = false;
@@ -17,10 +17,12 @@ void setup()
   envSensor.inactiveTime(standBy1000ms);
 
   // put your setup code here, to run once:
+  start = millis();
 }
 
 void loop()
 {
+
   // Retrieve sensor values
   float temperature = envSensor.getTemperature();
   float pressure = envSensor.getPressure();
